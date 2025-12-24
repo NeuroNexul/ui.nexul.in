@@ -10,7 +10,7 @@ export default function Layout({ children }: LayoutProps<"/docs">) {
       tree={source.pageTree}
       sidebar={{
         className: cn(
-          "data-[collapsed=false]:!bg-background data-[collapsed=false]:border-none transition-[width,inset-block,translate]",
+          "z-50 data-[collapsed=false]:!bg-background data-[collapsed=false]:border-none transition-[width,inset-block,translate]",
           "[&>div:last-child>div]:justify-end"
         ),
       }}

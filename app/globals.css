@@ -129,5 +129,13 @@
 
 #nd-docs-layout {
   /* --fd-layout-width: 95%; */
-  --fd-sidebar-width: 18rem !important;
+  /* --fd-sidebar-width: 18rem !important; */
+}
+
+:root {
+  --fd-banner-height: 0rem !important;
+}
+
+#nd-sidebar-mobile {
+  z-index: 50 !important;
 }
