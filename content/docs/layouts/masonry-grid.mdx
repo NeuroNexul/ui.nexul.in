@@ -5,46 +5,57 @@ description: Learn how to create a masonry grid layout using Nexul UI components
 
 import { Example1 } from "./example";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+import { TypeTable } from 'fumadocs-ui/components/type-table';
 
 <Tabs items={["Demo", "Code"]} className="overflow-visible">
   <Tab className="p-0 -mr-2 overflow-visible bg-transparent">
     <Example1 />
   </Tab>
   <Tab>
-```tsx
+```tsx lineNumbers
 "use client";
 
 import Container from "@/components/mdx/container";
+import { useFPS } from "@/lib/useFPS";
 import { MasonryRowGrid } from "@/registry/layouts/masonry/masonry-row";
 
-const items = Array.from({ length: 20 }, () => ({
-  id: crypto.randomUUID(),
-  color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 80%)`,
-  width: Math.floor(Math.random() * 200) + 100,
-  height: Math.floor(Math.random() * 200) + 100,
-}));
+const items = [
+	{
+		"width": 278,
+		"height": 162,
+		"url": "/v1767112457/uploaded/image-1767112450944_o28d6i.jpg"
+	},
+	// ... (rest of the items)
+];
 
 export function Example1() {
+  const fps = useFPS();
+
   return (
     <Container
       resizable
       className="h-150"
-      containerProps={{ className: "block overflow-auto" }}>
+      containerProps={{ className: "block overflow-auto" }}
+    >
+      <div className="absolute top-0 right-0 bg-background/70 px-2 py-1 rounded z-50">
+        FPS: {fps}
+      </div>
       <MasonryRowGrid
         containerProps={{ className: "w-full min-h-full" }}
         items={items}
-        gap={8}
-        targetHeight={270}
-        renderItem={(item, index, measures) => (
+        targetHeight={250}
+        scaleFactor={0.1}
+        layout="justified"
+        renderItem={(item, index) => (
           <div
-            className={`rounded-md h-full w-full grid place-items-center`}
-            style={{ backgroundColor: item.color }}>
-            <div>
-              <h2 className="font-bold text-lg text-black">Item {index}</h2>
-              <p className="text-md text-black">
-                {measures.width.toFixed(0)} x {measures.height.toFixed(0)}
-              </p>
-            </div>
+            className={`rounded-md h-full w-full grid place-items-center relative overflow-hidden`}
+            style={{ backgroundColor: item.color }}
+          >
+            <img
+              src={`https://res.cloudinary.com/djoo8ogmp/image/upload/w_${item.width},h_${item.height},c_fill${item.url}`}
+              alt={`Random image ${index}`}
+              className="object-cover w-full h-full"
+            />
           </div>
         )}
       />
@@ -55,9 +66,439 @@ export function Example1() {
   </Tab>
 </Tabs>
 
+## Installation
+
+<Tabs items={[ "CLI", "Manual" ]}>
+<Tab>
+### Make sure to have the following line in your `components.json` file:
+
+```json
+{
+	"registries": {
+		"@nexul": "https://ui.nexul.in/r/{name}.json"
+	}
+}
+```
+
+### Run the following command:
+
+```bash tab="npm"
+npx shadcn@latest add @nexul/masonry-row
+```
+```bash tab="yarn"
+yarn shadcn@latest add @nexul/masonry-row
+```
+```bash tab="pnpm"
+pnpm dlx shadcn@latest add @nexul/masonry-row
+```
+```bash tab="bun"
+bun --bun shadcn@latest add @nexul/masonry-row
+```
+</Tab>
+<Tab>
+### Manual Installation
+
+#### Dependencies
+
+```ts title="lib/utils.ts"
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+```
+
+#### Copy the source files
+
+```tsx title="components/ui/masonry/masonry-row.tsx"
+"use client";
+
+import { cn } from "@/lib/utils";
+import React from "react";
+import {
+  calculateJustifiedMasonryLayout,
+  calculateNaiveMasonryLayout,
+} from "./calculate-masonry";
+import { mergeRefs } from "@/lib/merge-refs";
+
+export type GridItemProps = {
+  /* Original width of the grid item */
+  width: number;
+  /* Original height of the grid item */
+  height: number;
+
+  // Additional properties can be added as needed
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+};
+
+export type Measures = {
+  /* Calculated width of the grid item */
+  width: number;
+  /* Calculated height of the grid item */
+  height: number;
+  /* Calculated top position of the grid item */
+  top: number;
+  /* Calculated left position of the grid item */
+  left: number;
+
+  /* Row number of the grid item in the row (0-based index) */
+  index: number;
+  /* Row number of the grid item (1-based index) */
+  rowNo: number;
+  /* Total items in the row */
+  totalItemsInRow: number;
+};
+
+type Props = {
+  /** Container props for the masonry grid container */
+  containerProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** Item props for each masonry grid item */
+  itemProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** Gap between grid items */
+  gap?: number;
+  /** Target height for each grid item; default is 300 */
+  targetHeight?: number;
+  /** Scale factor for resizing grid items; default is 0.1 */
+  scaleFactor?: number;
+  /** Layout type: "naive" or "justified"; default is "naive" */
+  layout?: "naive" | "justified";
+  /** Array of grid items to be displayed */
+  items?: GridItemProps[];
+  /** Function to render each grid item */
+  renderItem?: (
+    /** Props of the grid item to be rendered */
+    item: GridItemProps,
+    /** Index of the grid item in the array */
+    index: number,
+    /** Calculated measures for the grid item */
+    measures: Measures
+  ) => React.ReactNode;
+};
+
+const MasonryRowGrid = React.forwardRef<HTMLDivElement, Props>(
+  (
+    {
+      containerProps: { className, ...containerProps } = {},
+      itemProps: {
+        className: itemClassName,
+        style: itemStyle,
+        ...itemProps
+      } = {},
+      gap = 8,
+      targetHeight = 300,
+      scaleFactor = 0.1,
+      layout: layoutType = "naive",
+      items = [],
+      renderItem,
+    }: Props,
+    ref
+  ) => {
+    const [viewportWidth, setViewportWidth] = React.useState<number>(0);
+    const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+    const layout = React.useMemo(
+      () =>
+        layoutType === "naive"
+          ? calculateNaiveMasonryLayout({
+              viewportWidth,
+              items,
+              targetHeight,
+              scaleFactor,
+            })
+          : calculateJustifiedMasonryLayout({
+              viewportWidth,
+              items,
+              targetHeight,
+              scaleFactor,
+            }),
+      [layoutType, viewportWidth, items, targetHeight, scaleFactor]
+    );
+
+    React.useLayoutEffect(() => {
+      if (!containerRef.current || containerRef.current === null) return; // Return if the container is not found
+      let animationFrameID: number | null = null; // Initialize animation frame ID
+
+      const resizeObserver = new ResizeObserver((entries) => {
+        const newWidth = entries[0].contentRect.width; // This gives the actual width of the inside of the container
+        if (animationFrameID) cancelAnimationFrame(animationFrameID); // Cancel the previous animation frame
+
+        animationFrameID = requestAnimationFrame(() => {
+          setViewportWidth(newWidth); // Update the viewport width based on the resize observer
+        });
+      });
+      resizeObserver.observe(containerRef.current); // Observe the container for changes
+      return () => {
+        resizeObserver.disconnect(); // Cleanup the observer on unmount
+        if (animationFrameID) cancelAnimationFrame(animationFrameID); // Cancel the animation frame on unmount
+      };
+    }, [containerRef, gap, items, targetHeight, scaleFactor]);
+
+    return (
+      <div
+        ref={mergeRefs(containerRef, ref)}
+        className={cn("relative w-full flex flex-wrap", className)}
+        {...containerProps}
+      >
+        {items.map((item, index) => {
+          const measures = layout[0][index];
+
+          return (
+            <div
+              key={index}
+              className={cn("absolute", itemClassName)}
+              style={{
+                top: measures.top,
+                left: measures.left,
+                width: measures.width,
+                height: measures.height,
+
+                paddingTop: measures.rowNo === 1 ? gap : gap / 2,
+                paddingBottom: measures.rowNo === layout[2] ? gap : gap / 2,
+                paddingLeft: measures.index === 0 ? gap : gap / 2,
+                paddingRight:
+                  measures.index === measures.totalItemsInRow - 1
+                    ? gap
+                    : gap / 2,
+
+                ...itemStyle,
+              }}
+              {...itemProps}
+            >
+              {renderItem ? renderItem(item, index, measures) : null}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+);
+MasonryRowGrid.displayName = "MasonryRowGrid";
+
+export { MasonryRowGrid };
+```
+
+```ts title="components/ui/masonry/calculate-masonry.ts"
+import { GridItemProps, Measures } from "./masonry-row";
+
+/**
+ * Calculates the masonry layout for a set of items within a given viewport width.
+ * @param viewportWidth - The width of the container in which the items will be laid out.
+ * @param items - An array of items to be laid out, each with width and height properties.
+ * @param targetHeight - The desired height for each row in the layout.
+ * @param scaleFactor - A factor to allow rows to deviate from the target height.
+ *
+ * @returns [Measures[], totalHeight, rowCount]
+ */
+export function calculateNaiveMasonryLayout({
+  viewportWidth,
+  items,
+  targetHeight,
+  scaleFactor = 0.1,
+}: {
+  viewportWidth: number;
+  items: GridItemProps[];
+  targetHeight: number;
+  scaleFactor?: number;
+}) {
+
+  const max_height = targetHeight * (1 + scaleFactor);
+
+  let rows: Measures[] = [];
+  let row: Measures[] = [];
+  let currentWidth = 0;
+  let totalHeight = 0; // Initialize total height
+  let rowNumber = 1; // Initialize row number
+
+  function finalizeRow() {
+    // Calculate the height of the row based on the width and max height
+    const height =
+      viewportWidth < currentWidth
+        ? (viewportWidth / currentWidth) * max_height
+        : max_height;
+
+    let left = 0;
+    for (let i = 0; i < row.length; i++) {
+      const item = row[i];
+      const width = (height / item.height) * item.width;
+
+      row[i].width = width;
+      row[i].height = height;
+      row[i].top = totalHeight;
+      row[i].left = left;
+
+      row[i].index = i; // Update index in the row
+      row[i].totalItemsInRow = row.length; // Update total images in the row
+      left += width;
+    }
+
+    rows = rows.concat(row);
+    totalHeight += height;
+    row = [];
+    currentWidth = 0;
+    rowNumber += 1; // Increment row number
+  }
+
+  items.forEach((item) => {
+    row.push({
+      width: item.width,
+      height: item.height,
+      top: 0,
+      left: 0,
+
+      index: 0, // Placeholder, will be updated while finalizing
+      rowNo: rowNumber,
+      totalItemsInRow: 0, // Placeholder, will be updated while finalizing
+    });
+    currentWidth += (max_height / item.height) * item.width;
+
+    // If current width exceeds viewport, finalize the row
+    if (currentWidth >= viewportWidth) finalizeRow();
+  });
+
+  if (row.length > 0) finalizeRow();
+
+  return [rows, totalHeight, rowNumber] as const;
+}
+
+/**
+ * Calculates the masonry layout for a set of items within a given viewport width.
+ * @param viewportWidth - The width of the container in which the items will be laid out.
+ * @param items - An array of items to be laid out, each with width and height properties.
+ * @param targetHeight - The desired height for each row in the layout.
+ * @param scaleFactor - A factor to allow rows to deviate from the target height.
+ *
+ * @returns [Measures[], totalHeight, rowCount]
+ */
+export function calculateJustifiedMasonryLayout({
+  viewportWidth,
+  items,
+  targetHeight,
+  scaleFactor = 0.1,
+}: {
+  viewportWidth: number;
+  items: GridItemProps[];
+  targetHeight: number;
+  scaleFactor?: number;
+}): [Measures[], number, number] {
+  const min_height = targetHeight * (1 - scaleFactor);
+  // const max_height = targetHeight * (1 + scaleFactor);
+  // const MAX_TOLERANCE = targetHeight * 1.35;
+
+  const count = items.length;
+  const aspectRatios = items.map((item) => item.width / item.height);
+
+  // dp[i] represents the minimum cost to arrange items[0..i-1]
+  const dp = new Array(count + 1).fill(Infinity);
+  dp[0] = 0;
+
+  // parent[i] stores the starting index of the row that ends at i
+  // This is used to reconstruct the layout later
+  const parent = new Array(count + 1).fill(0);
+
+  for (let i = 1; i <= count; i++) {
+    let currentAspectRatioSum = 0;
+
+    // Look back at previous items to find the best break point
+    for (let j = i - 1; j >= 0; j--) {
+      currentAspectRatioSum += aspectRatios[j];
+      const rowHeight = viewportWidth / currentAspectRatioSum;
+
+      // As we add more items (decreasing j), the rowHeight gets smaller.
+      // If it's already smaller than min_height, adding more items will only
+      // make it worse (shorter). So we can stop looking back.
+      if (rowHeight < min_height) {
+        // However! If this is the very first item we are checking (j === i-1),
+        // we must accept it, otherwise we might end up with NO valid path
+        // if a single panorama is naturally shorter than min_height.
+        if (j !== i - 1) break;
+      }
+
+      // If a row is too tall, the squared cost will naturally be high,
+      // but it will still be selectable if it's the only option.
+      let cost = Math.pow(rowHeight - targetHeight, 2);
+
+      // Orphan Penalty
+      // We generally dislike rows with only 1 item, unless that item is naturally wide.
+      // If the row has 1 item and it's making the row tall (> target), add a penalty.
+      if (i - j === 1 && rowHeight > targetHeight)
+        cost += Math.pow(targetHeight, 2) * 2;
+
+      // Total cost if we break the row here
+      // This includes the cost up to the previous item plus the cost of the current row
+      const totalCost = dp[j] + cost;
+
+      // Update dp and parent if we found a new minimum cost
+      if (totalCost < dp[i]) {
+        dp[i] = totalCost;
+        parent[i] = j;
+      }
+    }
+
+    // Fallback for safety against Infinity
+    if (dp[i] === Infinity) {
+      parent[i] = i - 1;
+      dp[i] = dp[i - 1] + Math.pow(targetHeight * 10, 2);
+    }
+  }
+
+  const measures: Measures[] = new Array(count);
+  const rows: { start: number; end: number; height: number }[] = [];
+
+  // Backtrack from the last item to finding row breaks
+  let curr = count;
+  while (curr > 0) {
+    const start = parent[curr];
+
+    // Recalculate the exact height for this final decided row
+    let rowAspectRatioSum = 0;
+    for (let k = start; k < curr; k++) rowAspectRatioSum += aspectRatios[k];
+
+    const exactRowHeight = viewportWidth / rowAspectRatioSum;
+    // if (exactRowHeight > MAX_TOLERANCE) exactRowHeight = MAX_TOLERANCE;
+
+    rows.unshift({ start, end: curr, height: exactRowHeight });
+    curr = start;
+  }
+
+  // Generate Measures
+  let currentTop = 0;
+
+  rows.forEach((row, rowIndex) => {
+    let currentLeft = 0;
+    const itemsInRow = row.end - row.start;
+
+    for (let k = row.start; k < row.end; k++) {
+      const itemWidth = aspectRatios[k] * row.height;
+
+      measures[k] = {
+        width: itemWidth,
+        height: row.height,
+        top: currentTop,
+        left: currentLeft,
+        index: k - row.start,
+        rowNo: rowIndex + 1,
+        totalItemsInRow: itemsInRow,
+      };
+
+      currentLeft += itemWidth;
+    }
+
+    currentTop += row.height;
+  });
+
+  return [measures, currentTop, rows.length];
+}
+```
+
+</Tab>
+</Tabs>
+
 ## Usages
 
-```tsx
+```tsx title="Basic Usage" lineNumbers
+"use client";
 import { MasonryRowGrid } from "@nexul/ui/layouts/masonry/masonry-row";
 
 <MasonryRowGrid
@@ -70,3 +511,26 @@ import { MasonryRowGrid } from "@nexul/ui/layouts/masonry/masonry-row";
   )}
 />
 ```
+
+## Props Reference
+
+<Tabs items={["Props", "GridItemProps", "Measures"]}>
+	<Tab>
+	**`Props` type reference:**
+	This type defines the properties that can be passed to the `MasonryRowGrid` component to customize its behavior and appearance.
+
+	<AutoTypeTable path="registry/layouts/masonry/masonry-row.tsx" name="Props" />
+	</Tab>
+	<Tab>
+	**`GridItemProps` type reference:**
+	This type defines the properties of each item that will be displayed in the masonry grid.
+
+	<AutoTypeTable path="registry/layouts/masonry/masonry-row.tsx" name="GridItemProps" />
+	</Tab>
+	<Tab>
+	**`Measures` type reference:**
+	This type defines the calculated layout measurements for each item in the masonry grid.
+
+	<AutoTypeTable path="registry/layouts/masonry/masonry-row.tsx" name="Measures" />
+	</Tab>
+</Tabs>

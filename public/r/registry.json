@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "Nexul UI",
+  "homepage": "https://ui.nexul.in",
+  "author": "Arif Sardar <me@nexul.in>",
+  "items": [
+    {
+      "name": "masonry-row",
+      "type": "registry:component",
+      "title": "Masonry Row Grid Layout",
+      "description": "A responsive masonry grid layout that arranges items of different sizes in rows with varying heights.",
+      "files": [
+        {
+          "path": "registry/layouts/masonry/masonry-row.tsx",
+          "type": "registry:component",
+          "target": "components/ui/masonry/masonry-row.tsx"
+        },
+        {
+          "path": "registry/layouts/masonry/calculate-masonry.ts",
+          "type": "registry:file",
+          "target": "components/ui/masonry/calculate-masonry.ts"
+        },
+        {
+          "path": "lib/merge-refs.ts",
+          "type": "registry:lib",
+          "target": "lib/merge-refs.ts"
+        }
+      ]
+    }
+  ]
+}
