@@ -16,9 +16,9 @@
           "target": "components/ui/masonry/masonry-row.tsx"
         },
         {
-          "path": "registry/layouts/masonry/calculate-masonry.ts",
+          "path": "registry/layouts/masonry/calculate-masonry-row.ts",
           "type": "registry:file",
-          "target": "components/ui/masonry/calculate-masonry.ts"
+          "target": "components/ui/masonry/calculate-masonry-row.ts"
         },
         {
           "path": "lib/merge-refs.ts",

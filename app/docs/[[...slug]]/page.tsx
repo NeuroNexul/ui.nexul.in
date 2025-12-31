@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/mdx-components";
 import type { Metadata } from "next";
 import { createRelativeLink } from "fumadocs-ui/mdx";
+import { OpenInV0Button } from "@/components/ui/open-in-v0-button";
 
 export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const params = await props.params;
@@ -25,11 +26,30 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
         style: "clerk",
       }}
       breadcrumb={{
-        enabled: true
+        enabled: true,
       }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsDescription className="mb-0">
+        {page.data.description}
+      </DocsDescription>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        {page.data.tags && (
+          <div className="flex flex-wrap gap-2">
+            {page.data.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-md bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+        {page.data.registry_url && (
+          <OpenInV0Button url={page.data.registry_url} />
+        )}
+      </div>
       <DocsBody>
         <MDX
           components={getMDXComponents({

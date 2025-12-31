@@ -9,7 +9,7 @@ const items = [
   {
     "width": 278,
     "height": 162,
-    "url": "/v1767112457/uploaded/image-1767112450944_o28d6i.jpg"
+    "url": "/v1767112251/uploaded/image-1767112234730_xoehkl.jpg"
   },
   {
     "width": 151,
@@ -24,7 +24,7 @@ const items = [
   {
     "width": 240,
     "height": 269,
-    "url": "/v1767112251/uploaded/image-1767112234730_xoehkl.jpg"
+    "url": "/v1767112457/uploaded/image-1767112450944_o28d6i.jpg"
   },
   {
     "width": 162,

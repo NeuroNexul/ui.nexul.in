@@ -139,3 +139,7 @@
 #nd-sidebar-mobile {
   z-index: 50 !important;
 }
+
+code {
+  font-family: var(--font-jet-brains-mono), monospace;
+}

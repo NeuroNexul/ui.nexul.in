@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Barlow, Geist, Geist_Mono, Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { cookies } from "next/headers";
 import { ViewTransitions } from "next-view-transitions";
@@ -11,7 +12,6 @@ const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -29,6 +29,11 @@ const poppins = Poppins({
   display: "swap",
   preload: true,
   variable: "--font-poppins",
+});
+const jetBrainsMono = localFont({
+  src: "../assets/JetBrainsMonoNerdFont-Regular.woff",
+  display: "swap",
+  variable: "--font-jet-brains-mono",
 });
 
 export const metadata: Metadata = {
@@ -55,6 +60,7 @@ export default async function RootLayout({
             geistMono.variable,
             barlow.variable,
             poppins.variable,
+            jetBrainsMono.variable,
             barlow.className,
             theme?.value === "light" ? "light" : "dark"
           )}

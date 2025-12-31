@@ -5,7 +5,7 @@ import React from "react";
 import {
   calculateJustifiedMasonryLayout,
   calculateNaiveMasonryLayout,
-} from "./calculate-masonry";
+} from "./calculate-masonry-row";
 import { mergeRefs } from "@/lib/merge-refs";
 
 export type GridItemProps = {
@@ -66,7 +66,7 @@ export type Props = {
 const MasonryRowGrid = React.forwardRef<HTMLDivElement, Props>(
   (
     {
-      containerProps: { className, ...containerProps } = {},
+      containerProps: { className, style, ...containerProps } = {},
       itemProps: {
         className: itemClassName,
         style: itemStyle,
@@ -84,7 +84,7 @@ const MasonryRowGrid = React.forwardRef<HTMLDivElement, Props>(
     const [viewportWidth, setViewportWidth] = React.useState<number>(0);
     const containerRef = React.useRef<HTMLDivElement | null>(null);
 
-    const layout = React.useMemo(
+    const [measures, totalHeight, rowCount] = React.useMemo(
       () =>
         layoutType === "naive"
           ? calculateNaiveMasonryLayout({
@@ -124,35 +124,37 @@ const MasonryRowGrid = React.forwardRef<HTMLDivElement, Props>(
     return (
       <div
         ref={mergeRefs(containerRef, ref)}
-        className={cn("relative w-full flex flex-wrap", className)}
+        className={cn("relative", className)}
+        style={{
+          height: totalHeight,
+          ...style,
+        }}
         {...containerProps}
       >
         {items.map((item, index) => {
-          const measures = layout[0][index];
+          const measure = measures[index];
 
           return (
             <div
               key={index}
               className={cn("absolute", itemClassName)}
               style={{
-                top: measures.top,
-                left: measures.left,
-                width: measures.width,
-                height: measures.height,
+                top: measure.top,
+                left: measure.left,
+                width: measure.width,
+                height: measure.height,
 
-                paddingTop: measures.rowNo === 1 ? gap : gap / 2,
-                paddingBottom: measures.rowNo === layout[2] ? gap : gap / 2,
-                paddingLeft: measures.index === 0 ? gap : gap / 2,
+                paddingTop: measure.rowNo === 1 ? gap : gap / 2,
+                paddingBottom: measure.rowNo === rowCount ? gap : gap / 2,
+                paddingLeft: measure.index === 0 ? gap : gap / 2,
                 paddingRight:
-                  measures.index === measures.totalItemsInRow - 1
-                    ? gap
-                    : gap / 2,
+                  measure.index === measure.totalItemsInRow - 1 ? gap : gap / 2,
 
                 ...itemStyle,
               }}
               {...itemProps}
             >
-              {renderItem ? renderItem(item, index, measures) : null}
+              {renderItem ? renderItem(item, index, measure) : null}
             </div>
           );
         })}

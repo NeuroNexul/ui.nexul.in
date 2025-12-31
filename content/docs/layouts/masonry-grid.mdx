@@ -1,13 +1,22 @@
 ---
 title: Masonry Row Grid Layout
 description: Learn how to create a masonry grid layout using Nexul UI components.
+registry_url: "https://ui.nexul.in/r/masonry-row.json"
+tags:
+  - layouts
+  - masonry grid
+  - performance
+  - responsive design
+  - call to action
 ---
 
 import { Example1 } from "./example";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Info } from '@fumadocs/ui/icons'
 
-<Tabs items={["Demo", "Code"]} className="overflow-visible">
+<Tabs items={["Preview", "Code"]} className="overflow-visible">
   <Tab className="p-0 -mr-2 overflow-visible bg-transparent">
     <Example1 />
   </Tab>
@@ -17,7 +26,7 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 
 import Container from "@/components/mdx/container";
 import { useFPS } from "@/lib/useFPS";
-import { MasonryRowGrid } from "@/registry/layouts/masonry/masonry-row";
+import { MasonryRowGrid } from "@/components/ui/masonry/masonry-row";
 
 const items = [
 	{
@@ -66,11 +75,20 @@ export function Example1() {
   </Tab>
 </Tabs>
 
+## Introduction
+
+Building a masonry grid layout is always a pain. And the most difficult part is to ensure responsiveness and performance.
+
+This component addresses these challenges by providing a robust solution for arranging items with precise positioning and sizing.
+Originally designed for image galleries, this reusable Masonry Row Grid Layout simplifies the implementation of justified grids in any React application.
+
 ## Installation
 
 <Tabs items={[ "CLI", "Manual" ]}>
 <Tab>
-### Make sure to have the following line in your `components.json` file:
+### CLI Installation
+
+<p className="text-lg font-semibold">Make sure to have the following line in your `components.json` file:</p>
 
 ```json
 {
@@ -80,7 +98,7 @@ export function Example1() {
 }
 ```
 
-### Run the following command:
+<p className="text-lg font-semibold">Run the following command:</p>
 
 ```bash tab="npm"
 npx shadcn@latest add @nexul/masonry-row
@@ -98,7 +116,7 @@ bun --bun shadcn@latest add @nexul/masonry-row
 <Tab>
 ### Manual Installation
 
-#### Dependencies
+<p className="text-lg font-semibold">Dependencies</p>
 
 ```ts title="lib/utils.ts"
 import { clsx, type ClassValue } from "clsx"
@@ -109,7 +127,25 @@ export function cn(...inputs: ClassValue[]) {
 }
 ```
 
-#### Copy the source files
+```ts title="lib/merge-refs.ts"
+import type * as React from 'react';
+
+export function mergeRefs<T>(
+  ...refs: (React.Ref<T> | undefined)[]
+): React.RefCallback<T> {
+  return (value) => {
+    refs.forEach((ref) => {
+      if (typeof ref === 'function') {
+        ref(value);
+      } else if (ref) {
+        ref.current = value;
+      }
+    });
+  };
+}
+```
+
+<p className="text-lg font-semibold">Copy the source files</p>
 
 ```tsx title="components/ui/masonry/masonry-row.tsx"
 "use client";
@@ -119,7 +155,7 @@ import React from "react";
 import {
   calculateJustifiedMasonryLayout,
   calculateNaiveMasonryLayout,
-} from "./calculate-masonry";
+} from "./calculate-masonry-row";
 import { mergeRefs } from "@/lib/merge-refs";
 
 export type GridItemProps = {
@@ -279,7 +315,7 @@ MasonryRowGrid.displayName = "MasonryRowGrid";
 export { MasonryRowGrid };
 ```
 
-```ts title="components/ui/masonry/calculate-masonry.ts"
+```ts title="components/ui/masonry/calculate-masonry-row.ts"
 import { GridItemProps, Measures } from "./masonry-row";
 
 /**
@@ -497,40 +533,257 @@ export function calculateJustifiedMasonryLayout({
 
 ## Usages
 
-```tsx title="Basic Usage" lineNumbers
-"use client";
+```tsx title="page.tsx" lineNumbers
+import React from "react";
 import { MasonryRowGrid } from "@nexul/ui/layouts/masonry/masonry-row";
 
-<MasonryRowGrid
-  items={items}
-  targetHeight={270}
-  renderItem={(item, index, measures) => (
-    <div className={`rounded-md h-full w-full`}>
-      <h2 className="font-bold text-lg">Item {index}</h2>
-    </div>
-  )}
-/>
+const items = [
+  {
+    "width": 278,
+    "height": 162
+  },
+  // ... (rest of the items)
+];
+
+export default function Page() {
+  return (
+    <MasonryRowGrid
+      items={items}
+      targetHeight={270}
+      layout="justified"
+      renderItem={(item, index, measures) => (
+        <div className="h-full w-full grid place-items-center rounded-md">
+          <h2 className="font-bold text-lg">Item {index}</h2>
+        </div>
+      )}
+    />
+  );
+}
 ```
 
-{/* ## Props Reference
+## Layout Modes
+
+<Callout icon={<Info className="-me-0.5 size-6 fill-(--callout-color) text-fd-card" />}>
+  <p className="text-base text-(--tw-prose-body)">The `MasonryRowGrid` component supports two layout modes: `naive` and `justified`.</p>
+  
+  <p className="text-base text-(--tw-prose-body)">If you have **finite amount** of items to show in the grid, it is recommended to use the `justified` layout mode for better visual balance.</p>
+  
+  <p className="text-base text-(--tw-prose-body)">But, if you have **infinite scrolling** or **dynamic loading** of items, consider using the `naive` layout mode to avoid layout shifts.</p>
+</Callout>
+
+### Naive Layout
+
+This layout mode places items sequentially in rows, adjusting their sizes to fit within the viewport width while maintaining their aspect ratios.
+This always ensures the items not to exceed the `max_height` defined by `targetHeight * (1 + scaleFactor){:js}`.
+
+It is suitable for scenarios where items are loaded dynamically or when the total number of items is unknown.
+As this layout calculates the desired arrangement from the start, it avoids layout shifts during dynamic loading.
+
+But the downside is that the last row may appear uneven if it contains fewer items than the preceding rows.
+
+### Justified Layout
+
+This layout mode aims to create visually balanced rows by adjusting item sizes to fill the entire row width.
+It calculates the optimal arrangement of items to minimize gaps and ensure that each row is as close to
+the `targetHeight` as possible while respecting the `scaleFactor`. But, it allows rows to exceed the `max_height` in certain scenarios.
+
+This layout is ideal for finite collections of items, where a polished and organized appearance is desired.
+It calculates the best possible arrangement of items to achieve a justified look, making it perfect for image galleries or portfolios.
+So, having variable amount of items will cause layout shifts when new items are added or removed.
+
+## Structure
+
+The `MasonryRowGrid` component creates the following structure:
+
+```
+// [!code word:Root Container (div)]
+// [!code word:Item Container (div)]
+// [!code word:Item 1 (div)]
+// [!code word:Item 2 (div)]
+// [!code word: totalHeight ]
+// [!code word: x ]
+// [!code word: y ]
+// [!code word: w ]
+// [!code word: h ]
+// [!code word: gap ]
+Root Container (div)
+ |  └─ { position: relative; height: totalHeight px; }
+ |
+ ├─ Item Container (div)
+ |  |  └─ { position: absolute; top: x px; left: y px; width: w px; height: h px; padding: gap px; }
+ |  |
+ |  └─ Item 1 (div) // Created by renderItem
+ |
+ ├─ Item Container (div)
+ |  |  └─ { position: absolute; top: x px; left: y px; width: w px; height: h px; padding: gap px; }
+ |  |
+ |  └─ Item 2 (div) // Created by renderItem
+ └─ ...
+```
+
+- The root container is a `div` element with `position: relative{:js}` and a dynamic height based on the total height of the masonry layout.
+- Each item container is a `div` element with `position: absolute{:js}`, positioned according to the calculated layout.
+- Inside each item container, the content is rendered using the `renderItem` function provided via props.
+
+## Props Reference
 
 <Tabs items={["Props", "GridItemProps", "Measures"]}>
 	<Tab>
 	**`Props` type reference:**
 	This type defines the properties that can be passed to the `MasonryRowGrid` component to customize its behavior and appearance.
 
-	<AutoTypeTable path="registry/layouts/masonry/masonry-row.tsx" name="Props" />
+  <TypeTable
+    type={{
+      containerProps: {
+        type: "React.HTMLAttributes<HTMLDivElement>",
+        description:
+          "Props forwarded to the outer masonry grid container. Useful for applying custom styles, class names, event handlers, or ARIA attributes.",
+        required: false,
+        default: "undefined",
+      },
+
+      itemProps: {
+        type: "React.HTMLAttributes<HTMLDivElement>",
+        description:
+          "Default props applied to each masonry grid item container. Can be overridden or extended inside the renderItem callback if needed.",
+        required: false,
+        default: "undefined",
+      },
+
+      gap: {
+        type: "number",
+        description:
+          "Spacing (in pixels) between grid items, applied both horizontally and vertically. Acts as the gutter size for the masonry layout.",
+        required: false,
+        default: "0",
+      },
+
+      targetHeight: {
+        type: "number",
+        description:
+          "Desired height (in pixels) for each grid item before layout scaling is applied. Used by the layout algorithm to normalize item sizes.",
+        required: false,
+        default: "300",
+      },
+
+      scaleFactor: {
+        type: "number",
+        description:
+          "Controls how aggressively items are resized during layout calculation. Smaller values preserve original proportions; larger values allow more adjustment.",
+        required: false,
+        default: "0.1",
+      },
+
+      layout: {
+        type: `"naive" | "justified"`,
+        description:
+          "Defines the layout algorithm used to position items. 'naive' places items sequentially, while 'justified' attempts to balance rows for a cleaner visual flow.",
+        required: false,
+        default: `"naive"`,
+      },
+
+      items: {
+        type: "GridItemProps[]",
+        description:
+          "Array of items to be rendered inside the masonry grid. Each item provides the data required for layout calculation and rendering.",
+        required: false,
+        default: "[]",
+      },
+
+      renderItem: {
+        type: "(item: GridItemProps, index: number, measures: Measures) => React.ReactNode",
+        description:
+          "Custom render function for each grid item. Provides the original item data, its index, and computed layout measures such as width and height.",
+        required: false,
+        default: "undefined",
+      },
+    }}
+  />
 	</Tab>
 	<Tab>
 	**`GridItemProps` type reference:**
-	This type defines the properties of each item that will be displayed in the masonry grid.
+	Represents the raw, source-level data for a masonry grid item. These values are used as inputs to the layout algorithm before any scaling or positioning is applied.
 
-	<AutoTypeTable path="registry/layouts/masonry/masonry-row.tsx" name="GridItemProps" />
+	<TypeTable
+    type={{
+      width: {
+        type: "number",
+        description:
+          "Original intrinsic width of the grid item. Typically represents the natural width of the content (for example, an image’s width) before layout calculations.",
+        required: true,
+      },
+
+      height: {
+        type: "number",
+        description:
+          "Original intrinsic height of the grid item. Used together with width to preserve aspect ratio during layout computation.",
+        required: true,
+      },
+
+      "[key: string]": {
+        type: "any",
+        description:
+          "Allows attaching arbitrary metadata to a grid item, such as IDs, URLs, captions, or custom rendering flags. These properties are passed through unchanged to the renderItem callback.",
+        required: false,
+      },
+    }}
+  />
 	</Tab>
 	<Tab>
 	**`Measures` type reference:**
-	This type defines the calculated layout measurements for each item in the masonry grid.
+	Represents the computed layout result for a grid item after the masonry algorithm runs. These values describe where and how the item should be rendered in the grid.
 
-	<AutoTypeTable path="registry/layouts/masonry/masonry-row.tsx" name="Measures" />
+  <TypeTable
+    type={{
+      width: {
+        type: "number",
+        description:
+          "Final calculated width of the grid item after scaling and layout adjustments.",
+        required: true,
+      },
+
+      height: {
+        type: "number",
+        description:
+          "Final calculated height of the grid item after scaling, preserving the original aspect ratio where possible.",
+        required: true,
+      },
+
+      top: {
+        type: "number",
+        description:
+          "Computed top offset (in pixels) relative to the grid container. Used for absolute positioning.",
+        required: true,
+      },
+
+      left: {
+        type: "number",
+        description:
+          "Computed left offset (in pixels) relative to the grid container. Used for absolute positioning.",
+        required: true,
+      },
+
+      index: {
+        type: "number",
+        description:
+          "Zero-based index of the item within its row. Useful for row-level styling or conditional rendering.",
+        required: true,
+      },
+
+      rowNo: {
+        type: "number",
+        description:
+          "One-based row number in which the item is placed. Helpful for readability and analytics where human-friendly indexing is preferred.",
+        required: true,
+      },
+
+      totalItemsInRow: {
+        type: "number",
+        description:
+          "Total number of items present in the same row as this item. Enables row-aware layout decisions and styling.",
+        required: true,
+      },
+    }}
+  />
 	</Tab>
-</Tabs> */}
+</Tabs>
