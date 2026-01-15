@@ -71,7 +71,6 @@ const LOGOS: LogoConfig[] = [
   },
   {
     name: "Next.js",
-    // path: "M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 17.156l-7.578-10.74v7.678H8.578V7.094h1.484l7.344 10.406v-7.406h1.406v7.062h-1.25z",
     path: ["M9 15v-6l7.745 10.65a9 9 0 1 1 2.255 -1.993", "M15 12v-3"],
     viewBoxWidth: 24,
     viewBoxHeight: 24,
@@ -140,7 +139,9 @@ type Props = object;
 export function Example1({}: Props) {
   const fps = useFPS();
   const [selectedLogo, setSelectedLogo] = useState<LogoConfig>(LOGOS[0]);
-  const [interactionMode, setInteractionMode] = useState<"scatter" | "spill">("scatter");
+  const [interactionMode, setInteractionMode] = useState<"scatter" | "spill">(
+    "scatter"
+  );
   const [returnSpeed, setReturnSpeed] = useState(0.1);
   const [friction, setFriction] = useState(0.95);
   const [forceMu, setForceMu] = useState(1);
@@ -152,8 +153,13 @@ export function Example1({}: Props) {
       className="h-150"
       containerProps={{ className: "block overflow-auto" }}
     >
-      <div className="absolute top-0 left-0 flex items-center gap-2 bg-background/70 px-2 py-1 rounded z-50">
-        <span className="text-sm">FPS: {fps}</span>
+      <div className="absolute top-0 left-0 w-full flex items-center gap-2 p-2 z-50">
+        <Button variant="outline" size="sm" className="font-semibold">
+          FPS: {fps}
+        </Button>
+
+        <div className="flex-1" />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
@@ -189,12 +195,14 @@ export function Example1({}: Props) {
           <PopoverContent align="start" className="w-72">
             <div className="space-y-4">
               <h4 className="font-medium text-sm">Interaction Settings</h4>
-              
+
               <div className="space-y-2">
                 <Label className="text-xs">Mode</Label>
                 <div className="flex gap-2">
                   <Button
-                    variant={interactionMode === "scatter" ? "default" : "outline"}
+                    variant={
+                      interactionMode === "scatter" ? "default" : "outline"
+                    }
                     size="sm"
                     onClick={() => setInteractionMode("scatter")}
                     className="flex-1"
@@ -202,7 +210,9 @@ export function Example1({}: Props) {
                     Scatter
                   </Button>
                   <Button
-                    variant={interactionMode === "spill" ? "default" : "outline"}
+                    variant={
+                      interactionMode === "spill" ? "default" : "outline"
+                    }
                     size="sm"
                     onClick={() => setInteractionMode("spill")}
                     className="flex-1"
@@ -216,9 +226,14 @@ export function Example1({}: Props) {
                 <Switch
                   id="particle-death"
                   checked={enableParticleDeath}
-                  onCheckedChange={(checked) => setEnableParticleDeath(checked === true)}
+                  onCheckedChange={(checked) =>
+                    setEnableParticleDeath(checked === true)
+                  }
                 />
-                <Label htmlFor="particle-death" className="text-xs cursor-pointer">
+                <Label
+                  htmlFor="particle-death"
+                  className="text-xs cursor-pointer"
+                >
                   Enable Particle Death
                 </Label>
               </div>
@@ -226,7 +241,9 @@ export function Example1({}: Props) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <Label className="text-xs">Force</Label>
-                  <span className="text-xs text-muted-foreground">{forceMu.toFixed(2)}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {forceMu.toFixed(2)}
+                  </span>
                 </div>
                 <Slider
                   min={0.1}
@@ -240,7 +257,9 @@ export function Example1({}: Props) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <Label className="text-xs">Return Speed</Label>
-                  <span className="text-xs text-muted-foreground">{returnSpeed.toFixed(2)}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {returnSpeed.toFixed(2)}
+                  </span>
                 </div>
                 <Slider
                   min={0.01}
@@ -255,7 +274,9 @@ export function Example1({}: Props) {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label className="text-xs">Friction</Label>
-                    <span className="text-xs text-muted-foreground">{friction.toFixed(2)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {friction.toFixed(2)}
+                    </span>
                   </div>
                   <Slider
                     min={0.8}
