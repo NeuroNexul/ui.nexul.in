@@ -118,7 +118,7 @@ bunx --bun shadcn@latest add @nexul/masonry-row
 
 <p className="text-lg font-semibold">Dependencies</p>
 
-```ts title="lib/utils.ts"
+```ts title="lib/utils.ts" lineNumbers
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -127,7 +127,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 ```
 
-```ts title="lib/merge-refs.ts"
+```ts title="lib/merge-refs.ts" lineNumbers
 import type * as React from 'react';
 
 export function mergeRefs<T>(
@@ -147,7 +147,7 @@ export function mergeRefs<T>(
 
 <p className="text-lg font-semibold">Copy the source files</p>
 
-```tsx title="components/ui/masonry/masonry-row.tsx"
+```tsx title="components/ui/masonry/masonry-row.tsx" lineNumbers
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -315,7 +315,7 @@ MasonryRowGrid.displayName = "MasonryRowGrid";
 export { MasonryRowGrid };
 ```
 
-```ts title="components/ui/masonry/calculate-masonry-row.ts"
+```ts title="components/ui/masonry/calculate-masonry-row.ts" lineNumbers
 import { GridItemProps, Measures } from "./masonry-row";
 
 /**
