@@ -131,6 +131,11 @@ export default function SVGParticles({
 
       ctx.restore();
 
+      // Guard against zero-size canvas (can happen during unmount)
+      if (canvas.width === 0 || canvas.height === 0) {
+        return scale;
+      }
+
       textImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
