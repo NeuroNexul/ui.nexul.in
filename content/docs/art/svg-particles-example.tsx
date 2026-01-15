@@ -1,0 +1,297 @@
+"use client";
+
+import React, { useState } from "react";
+import Container from "@/components/mdx/container";
+import { useFPS } from "@/lib/useFPS";
+import SVGParticles from "@/registry/art/svg-particles/svg-particles";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { ChevronDownIcon, SettingsIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+
+type LogoConfig = {
+  name: string;
+  path: string | string[];
+  viewBoxWidth: number;
+  viewBoxHeight: number;
+  scatteredColor: string;
+  particleColor?: string;
+  pathStyle?: "fill" | "stroke";
+  strokeWidth?: number;
+  lineJoin?: CanvasLineJoin;
+  lineCap?: CanvasLineCap;
+};
+
+const LOGOS: LogoConfig[] = [
+  {
+    name: "AWS",
+    path: "M86 66l2 9c0 3 1 5 3 8v2l-1 3-7 4-2 1-3-1-4-5-3-6c-8 9-18 14-29 14-9 0-16-3-20-8-5-4-8-11-8-19s3-15 9-20c6-6 14-8 25-8a79 79 0 0 1 22 3v-7c0-8-2-13-5-16-3-4-8-5-16-5l-11 1a80 80 0 0 0-14 5h-2c-1 0-2-1-2-3v-5l1-3c0-1 1-2 3-2l12-5 16-2c12 0 20 3 26 8 5 6 8 14 8 25v32zM46 82l10-2c4-1 7-4 10-7l3-6 1-9v-4a84 84 0 0 0-19-2c-6 0-11 1-15 4-3 2-4 6-4 11s1 8 3 11c3 2 6 4 11 4zm80 10-4-1-2-3-23-78-1-4 2-2h10l4 1 2 4 17 66 15-66 2-4 4-1h8l4 1 2 4 16 67 17-67 2-4 4-1h9c2 0 3 1 3 2v2l-1 2-24 78-2 4-4 1h-9l-4-1-1-4-16-65-15 64-2 4-4 1h-9zm129 3a66 66 0 0 1-27-6l-3-3-1-2v-5c0-2 1-3 2-3h2l3 1a54 54 0 0 0 23 5c6 0 11-2 14-4 4-2 5-5 5-9l-2-7-10-5-15-5c-7-2-13-6-16-10a24 24 0 0 1 5-34l10-5a44 44 0 0 1 20-2 110 110 0 0 1 12 3l4 2 3 2 1 4v4c0 3-1 4-2 4l-4-2c-6-2-12-3-19-3-6 0-11 0-14 2s-4 5-4 9c0 3 1 5 3 7s5 4 11 6l14 4c7 3 12 6 15 10s5 9 5 14l-3 12-7 8c-3 3-7 5-11 6l-14 2z M274 144A220 220 0 0 1 4 124c-4-3-1-6 2-4a300 300 0 0 0 263 16c5-2 10 4 5 8z M287 128c-4-5-28-3-38-1-4 0-4-3-1-5 19-13 50-9 53-5 4 5-1 36-18 51-3 2-6 1-5-2 5-10 13-33 9-38z",
+    viewBoxWidth: 283,
+    viewBoxHeight: 150,
+    scatteredColor: "#FF9900",
+    particleColor: "white",
+  },
+  {
+    name: "GitHub",
+    path: "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z",
+    viewBoxWidth: 16,
+    viewBoxHeight: 16,
+    scatteredColor: "#6e5494",
+    particleColor: "white",
+  },
+  {
+    name: "React",
+    path: "M418.2 177.2c-5.4-1.8-10.8-3.5-16.2-5.1.9-3.7 1.7-7.4 2.5-11.1 12.3-59.6 4.2-107.5-23.1-123.3-26.3-15.1-69.2.6-112.6 38.4-4.3 3.7-8.5 7.6-12.5 11.5-2.7-2.6-5.5-5.2-8.3-7.7-45.5-40.4-91.1-57.4-118.4-41.5-26.2 15.2-34 60.3-23 116.7 1.1 5.6 2.3 11.1 3.7 16.7-6.4 1.8-12.7 3.8-18.6 5.9C38.3 196.2 0 225.4 0 255.6c0 31.2 40.8 62.5 96.3 81.5 4.5 1.5 9 3 13.6 4.3-1.5 6-2.8 11.9-4 18-10.5 55.5-2.3 99.5 23.9 114.6 27 15.6 72.4-.4 116.6-39.1 3.5-3.1 7-6.3 10.5-9.7 4.4 4.3 9 8.4 13.6 12.4 42.8 36.8 85.1 51.7 111.2 36.6 27-15.6 35.8-62.9 24.4-120.5-.9-4.4-1.9-8.9-3-13.5 3.2-.9 6.3-1.9 9.4-2.9 57.7-19.1 99.5-50 99.5-81.7 0-30.3-39.4-59.7-93.8-78.4zM282.9 92.3c37.2-32.4 71.9-45.1 87.7-36 16.9 9.7 23.4 48.9 12.8 100.4-.7 3.4-1.4 6.7-2.3 10-22.2-5-44.7-8.6-67.3-10.6-13-18.6-27.2-36.4-42.6-53.1 3.9-3.7 7.7-7.2 11.7-10.7zM167.2 307.5c5.1 8.7 10.3 17.4 15.8 25.9-15.6-1.7-31.1-4.2-46.4-7.5 4.4-14.4 9.9-29.3 16.3-44.5 4.6 8.8 9.3 17.5 14.3 26.1zm-30.3-120.3c14.4-3.2 29.7-5.8 45.6-7.8-5.3 8.3-10.5 16.8-15.4 25.4-4.9 8.5-9.7 17.2-14.2 26-6.3-14.9-11.6-29.5-16-43.6zm27.4 68.9c6.6-13.8 13.8-27.3 21.4-40.6s15.8-26.2 24.4-38.9c15-1.1 30.3-1.7 45.9-1.7s31 .6 45.9 1.7c8.5 12.6 16.6 25.5 24.3 38.7s14.9 26.7 21.7 40.4c-6.7 13.8-13.9 27.4-21.6 40.8-7.6 13.3-15.7 26.2-24.2 39-14.9 1.1-30.4 1.6-46.1 1.6s-30.9-.5-45.6-1.4c-8.7-12.7-16.9-25.7-24.6-39s-14.8-26.8-21.5-40.6zm180.6 51.2c5.1-8.8 9.9-17.7 14.6-26.7 6.4 14.5 12 29.2 16.9 44.3-15.5 3.5-31.2 6.2-47 8 5.4-8.4 10.5-17 15.5-25.6zm14.4-76.5c-4.7-8.8-9.5-17.6-14.5-26.2-4.9-8.5-10-16.9-15.3-25.2 16.1 2 31.5 4.7 45.9 8-4.6 14.8-10 29.2-16.1 43.4zM256.2 118.3c10.5 11.4 20.4 23.4 29.6 35.8-19.8-.9-39.7-.9-59.5 0 9.8-12.9 19.9-24.9 29.9-35.8zM140.2 57c16.8-9.8 54.1 4.2 93.4 39 2.5 2.2 5 4.6 7.6 7-15.5 16.7-29.8 34.5-42.9 53.1-22.6 2-45 5.5-67.2 10.4-1.3-5.1-2.4-10.3-3.5-15.5-9.4-48.4-3.2-84.9 12.6-94zm-24.5 263.6c-4.2-1.2-8.3-2.5-12.4-3.9-21.3-6.7-45.5-17.3-63-31.2-10.1-7-16.9-17.8-18.8-29.9 0-18.3 31.6-41.7 77.2-57.6 5.7-2 11.5-3.8 17.3-5.5 6.8 21.7 15 43 24.5 63.6-9.6 20.9-17.9 42.5-24.8 64.5zm116.6 98c-16.5 15.1-35.6 27.1-56.4 35.3-11.1 5.3-23.9 5.8-35.3 1.3-15.9-9.2-22.5-44.5-13.5-92 1.1-5.6 2.3-11.2 3.7-16.7 22.4 4.8 45 8.1 67.9 9.8 13.2 18.7 27.7 36.6 43.2 53.4-3.2 3.1-6.4 6.1-9.6 8.9zm24.5-24.3c-10.2-11-20.4-23.2-30.3-36.3 9.6.4 19.5.6 29.5.6 10.3 0 20.4-.2 30.4-.7-9.2 12.7-19.1 24.8-29.6 36.4zm130.7 30c-.9 12.2-6.9 23.6-16.5 31.3-15.9 9.2-49.8-2.8-86.4-34.2-4.2-3.6-8.4-7.5-12.7-11.5 15.3-16.9 29.4-34.8 42.2-53.6 22.9-1.9 45.7-5.4 68.2-10.5 1 4.1 1.9 8.2 2.7 12.2 4.9 21.6 5.7 44.1 2.5 66.3zm18.2-107.5c-2.8.9-5.6 1.8-8.5 2.6-7-21.8-15.6-43.1-25.5-63.8 9.6-20.4 17.7-41.4 24.5-62.9 5.2 1.5 10.2 3.1 15 4.7 46.6 16 79.3 39.8 79.3 58 0 19.6-34.9 44.9-84.8 61.4zm-149.7-15c25.3 0 45.8-20.5 45.8-45.8s-20.5-45.8-45.8-45.8c-25.3 0-45.8 20.5-45.8 45.8s20.5 45.8 45.8 45.8z",
+    viewBoxWidth: 512,
+    viewBoxHeight: 512,
+    scatteredColor: "#61DAFB",
+    particleColor: "white",
+  },
+  {
+    name: "Vercel",
+    path: "M12 1L24 22H0L12 1Z",
+    viewBoxWidth: 24,
+    viewBoxHeight: 22,
+    scatteredColor: "#00DCFF",
+    particleColor: "white",
+  },
+  {
+    name: "Next.js",
+    // path: "M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 17.156l-7.578-10.74v7.678H8.578V7.094h1.484l7.344 10.406v-7.406h1.406v7.062h-1.25z",
+    path: ["M9 15v-6l7.745 10.65a9 9 0 1 1 2.255 -1.993", "M15 12v-3"],
+    viewBoxWidth: 24,
+    viewBoxHeight: 24,
+    scatteredColor: "#ffffff",
+    particleColor: "#888888",
+    pathStyle: "stroke",
+    strokeWidth: 2,
+    lineJoin: "round",
+    lineCap: "round",
+  },
+  {
+    name: "TypeScript",
+    path: "M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z",
+    viewBoxWidth: 24,
+    viewBoxHeight: 24,
+    scatteredColor: "#3178C6",
+    particleColor: "white",
+  },
+  {
+    name: "Tailwind CSS",
+    path: "M12 6.036c-2.667 0-4.333 1.325-5 3.976 1-1.325 2.167-1.822 3.5-1.491.761.189 1.305.738 1.906 1.345C13.387 10.855 14.522 12 17 12c2.667 0 4.333-1.325 5-3.976-1 1.325-2.166 1.822-3.5 1.491-.761-.189-1.305-.738-1.907-1.345-.98-.99-2.114-2.134-4.593-2.134zM7 12c-2.667 0-4.333 1.325-5 3.976 1-1.326 2.167-1.822 3.5-1.491.761.189 1.305.738 1.907 1.345.98.989 2.115 2.134 4.594 2.134 2.667 0 4.333-1.325 5-3.976-1 1.325-2.167 1.822-3.5 1.491-.761-.189-1.305-.738-1.906-1.345C10.613 13.145 9.478 12 7 12z",
+    viewBoxWidth: 24,
+    viewBoxHeight: 24,
+    scatteredColor: "#38BDF8",
+    particleColor: "white",
+  },
+  {
+    name: "Node.js",
+    path: "M11.998 24c-.321 0-.641-.084-.922-.247L8.14 22.016c-.438-.245-.224-.332-.08-.383.581-.203.699-.249 1.318-.603.065-.037.15-.023.217.017l2.256 1.339c.082.045.198.045.275 0l8.795-5.077c.082-.047.134-.141.134-.238V6.921c0-.099-.053-.194-.137-.242l-8.791-5.072c-.081-.047-.189-.047-.271 0L3.075 6.68c-.085.048-.139.143-.139.241v10.15c0 .097.054.189.139.235l2.409 1.392c1.307.653 2.108-.116 2.108-.89V7.787c0-.142.114-.253.256-.253h1.115c.139 0 .255.111.255.253v10.021c0 1.745-.95 2.745-2.604 2.745-.508 0-.909 0-2.026-.551L2.28 18.675c-.57-.329-.922-.943-.922-1.604V6.921c0-.661.352-1.275.922-1.603L11.076.241c.558-.317 1.303-.317 1.845 0l8.794 5.077c.57.329.924.942.924 1.603v10.15c0 .661-.354 1.273-.924 1.604l-8.794 5.078c-.28.163-.6.247-.923.247zM19.34 13.678c0-1.855-1.254-2.348-3.885-2.696-2.663-.352-2.934-.534-2.934-1.156 0-.515.229-1.202 2.2-1.202 1.76 0 2.409.38 2.677 1.568.024.103.117.178.224.178h1.145c.067 0 .131-.026.177-.078.046-.051.067-.119.058-.187-.178-2.104-1.578-3.082-4.281-3.082-2.45 0-3.91 1.034-3.91 2.767 0 1.882 1.455 2.402 3.805 2.633 2.812.277 3.012.691 3.012 1.247 0 .966-.775 1.377-2.598 1.377-2.289 0-2.793-.575-2.961-1.714-.019-.112-.116-.196-.231-.196H10.72c-.126 0-.229.103-.229.231 0 1.337.728 2.931 4.352 2.931 2.605 0 4.104-1.024 4.104-2.814l-.607.293z",
+    viewBoxWidth: 24,
+    viewBoxHeight: 24,
+    scatteredColor: "#8CC84B",
+    particleColor: "white",
+  },
+];
+
+function LogoIcon({
+  logo,
+  className,
+}: {
+  logo: LogoConfig;
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox={`0 0 ${logo.viewBoxWidth} ${logo.viewBoxHeight}`}
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      fill={logo.pathStyle === "stroke" ? "none" : "currentColor"}
+      stroke={logo.pathStyle === "stroke" ? "currentColor" : "none"}
+      strokeWidth={logo.strokeWidth}
+      strokeLinejoin={logo.lineJoin}
+      strokeLinecap={logo.lineCap}
+    >
+      {Array.isArray(logo.path) ? (
+        logo.path.map((d, i) => <path key={i} d={d} />)
+      ) : (
+        <path d={logo.path} />
+      )}
+    </svg>
+  );
+}
+
+type Props = object;
+
+export function Example1({}: Props) {
+  const fps = useFPS();
+  const [selectedLogo, setSelectedLogo] = useState<LogoConfig>(LOGOS[0]);
+  const [interactionMode, setInteractionMode] = useState<"scatter" | "spill">("scatter");
+  const [returnSpeed, setReturnSpeed] = useState(0.1);
+  const [friction, setFriction] = useState(0.95);
+  const [forceMu, setForceMu] = useState(1);
+  const [enableParticleDeath, setEnableParticleDeath] = useState(false);
+
+  return (
+    <Container
+      resizable
+      className="h-150"
+      containerProps={{ className: "block overflow-auto" }}
+    >
+      <div className="absolute top-0 left-0 flex items-center gap-2 bg-background/70 px-2 py-1 rounded z-50">
+        <span className="text-sm">FPS: {fps}</span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <LogoIcon logo={selectedLogo} className="size-4" />
+              {selectedLogo.name}
+              <ChevronDownIcon className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel>Select Logo</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {LOGOS.map((logo) => (
+              <DropdownMenuItem
+                key={logo.name}
+                onClick={() => setSelectedLogo(logo)}
+                className={
+                  selectedLogo.name === logo.name ? "bg-accent" : undefined
+                }
+              >
+                <LogoIcon logo={logo} className="size-4" />
+                {logo.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm">
+              <SettingsIcon className="size-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-72">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm">Interaction Settings</h4>
+              
+              <div className="space-y-2">
+                <Label className="text-xs">Mode</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={interactionMode === "scatter" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setInteractionMode("scatter")}
+                    className="flex-1"
+                  >
+                    Scatter
+                  </Button>
+                  <Button
+                    variant={interactionMode === "spill" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setInteractionMode("spill")}
+                    className="flex-1"
+                  >
+                    Spill
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="particle-death"
+                  checked={enableParticleDeath}
+                  onCheckedChange={(checked) => setEnableParticleDeath(checked === true)}
+                />
+                <Label htmlFor="particle-death" className="text-xs cursor-pointer">
+                  Enable Particle Death
+                </Label>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label className="text-xs">Force</Label>
+                  <span className="text-xs text-muted-foreground">{forceMu.toFixed(2)}</span>
+                </div>
+                <Slider
+                  min={0.1}
+                  max={3}
+                  step={0.1}
+                  value={[forceMu]}
+                  onValueChange={([v]) => setForceMu(v)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label className="text-xs">Return Speed</Label>
+                  <span className="text-xs text-muted-foreground">{returnSpeed.toFixed(2)}</span>
+                </div>
+                <Slider
+                  min={0.01}
+                  max={0.5}
+                  step={0.01}
+                  value={[returnSpeed]}
+                  onValueChange={([v]) => setReturnSpeed(v)}
+                />
+              </div>
+
+              {interactionMode === "spill" && (
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label className="text-xs">Friction</Label>
+                    <span className="text-xs text-muted-foreground">{friction.toFixed(2)}</span>
+                  </div>
+                  <Slider
+                    min={0.8}
+                    max={0.99}
+                    step={0.01}
+                    value={[friction]}
+                    onValueChange={([v]) => setFriction(v)}
+                  />
+                </div>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="w-full h-full">
+        <SVGParticles
+          key={selectedLogo.name}
+          svgPath={selectedLogo.path}
+          className="w-full h-full"
+          viewBoxWidth={selectedLogo.viewBoxWidth}
+          viewBoxHeight={selectedLogo.viewBoxHeight}
+          logoHeight={200}
+          mobileLogoHeight={100}
+          scatteredColor={selectedLogo.scatteredColor}
+          particleColor={selectedLogo.particleColor}
+          pathStyle={selectedLogo.pathStyle}
+          strokeWidth={selectedLogo.strokeWidth}
+          lineJoin={selectedLogo.lineJoin}
+          lineCap={selectedLogo.lineCap}
+          interactionMode={interactionMode}
+          returnSpeed={returnSpeed}
+          friction={friction}
+          forceMu={forceMu}
+          enableParticleDeath={enableParticleDeath}
+        />
+      </div>
+    </Container>
+  );
+}

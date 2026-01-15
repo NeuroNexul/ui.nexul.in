@@ -5,6 +5,8 @@
     "index",
     "getting-started",
     "---Layouts---",
-    "...layouts"
+    "layouts/masonry-row-grid",
+    "---Art---",
+    "art/svg-particles"
   ]
 }
