@@ -117,7 +117,7 @@ export function Example1() {
       className="h-150"
       containerProps={{ className: "block overflow-auto" }}
     >
-      <div className="absolute top-0 right-0 bg-background/70 px-2 py-1 rounded z-50">
+      <div className="absolute top-0 left-0 bg-background/70 px-2 py-1 rounded z-50">
         FPS: {fps}
       </div>
       <MasonryRowGrid
