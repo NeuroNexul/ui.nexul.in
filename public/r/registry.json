@@ -5,10 +5,25 @@
   "author": "Arif Sardar <me@nexul.in>",
   "items": [
     {
+      "name": "svg-particles",
+      "type": "registry:component",
+      "title": "SVG Particles",
+      "description": "An interactive canvas particle effect that renders SVG paths as animated particles with mouse interaction.",
+      "dependencies": ["@/lib/utils"],
+      "files": [
+        {
+          "path": "registry/art/svg-particles/svg-particles.tsx",
+          "type": "registry:component",
+          "target": "components/ui/svg-particles.tsx"
+        }
+      ]
+    },
+    {
       "name": "masonry-row",
       "type": "registry:component",
       "title": "Masonry Row Grid Layout",
       "description": "A responsive masonry grid layout that arranges items of different sizes in rows with varying heights.",
+      "dependencies": ["@/lib/utils"],
       "files": [
         {
           "path": "registry/layouts/masonry/masonry-row.tsx",

@@ -3,6 +3,9 @@
   "name": "masonry-row",
   "title": "Masonry Row Grid Layout",
   "description": "A responsive masonry grid layout that arranges items of different sizes in rows with varying heights.",
+  "dependencies": [
+    "@/lib/utils"
+  ],
   "files": [
     {
       "path": "registry/layouts/masonry/masonry-row.tsx",
