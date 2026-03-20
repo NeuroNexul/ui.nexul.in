@@ -6,7 +6,7 @@
     "getting-started",
     "---Layouts---",
     "layouts/masonry-row-grid",
-    "---Art---",
-    "art/svg-particles"
+    "---Canvas---",
+    "canvas/svg-particles"
   ]
 }

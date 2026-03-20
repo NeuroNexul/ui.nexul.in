@@ -2,6 +2,7 @@
 "use client";
 
 import Container from "@/components/mdx/container";
+import { Button } from "@/components/ui/button";
 import { useFPS } from "@/lib/useFPS";
 import { MasonryRowGrid } from "@/registry/layouts/masonry/masonry-row";
 
@@ -117,8 +118,10 @@ export function Example1() {
       className="h-150"
       containerProps={{ className: "block overflow-auto" }}
     >
-      <div className="absolute top-0 left-0 bg-background/70 px-2 py-1 rounded z-50">
-        FPS: {fps}
+      <div className="absolute top-0 left-0 w-full flex items-center gap-2 p-2 z-50">
+        <Button variant="default" size="sm" className="font-semibold">
+          FPS: {fps}
+        </Button>
       </div>
       <MasonryRowGrid
         containerProps={{ className: "w-full min-h-full" }}

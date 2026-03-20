@@ -12,7 +12,7 @@
       "dependencies": ["@/lib/utils"],
       "files": [
         {
-          "path": "registry/art/svg-particles/svg-particles.tsx",
+          "path": "registry/canvas/svg-particles/svg-particles.tsx",
           "type": "registry:component",
           "target": "components/ui/svg-particles.tsx"
         }

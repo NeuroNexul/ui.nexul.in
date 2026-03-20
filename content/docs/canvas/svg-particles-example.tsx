@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Container from "@/components/mdx/container";
 import { useFPS } from "@/lib/useFPS";
-import SVGParticles from "@/registry/art/svg-particles/svg-particles";
+import SVGParticles from "@/registry/canvas/svg-particles/svg-particles";
 import {
   DropdownMenu,
   DropdownMenuContent,
