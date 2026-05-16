@@ -10,6 +10,7 @@
     "registry:build": "shadcn build"
   },
   "dependencies": {
+    "@fumadocs/ui": "^16.5.0",
     "@radix-ui/react-presence": "^1.1.5",
     "@types/mdx": "^2.0.13",
     "class-variance-authority": "^0.7.1",

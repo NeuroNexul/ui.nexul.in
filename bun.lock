@@ -5,6 +5,7 @@
     "": {
       "name": "ui.nexul.in",
       "dependencies": {
+        "@fumadocs/ui": "^16.5.0",
         "@radix-ui/react-presence": "^1.1.5",
         "@types/mdx": "^2.0.13",
         "class-variance-authority": "^0.7.1",
@@ -216,6 +217,8 @@
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
     "@fumadocs/tailwind": ["@fumadocs/tailwind@0.0.5", "", { "peerDependencies": { "@tailwindcss/oxide": "^4.0.0", "tailwindcss": "^4.0.0" }, "optionalPeers": ["@tailwindcss/oxide", "tailwindcss"] }, "sha512-ENKPWUDRmriccsrUDE4bDBq3FNr/ms3BP2rWlsAEMV1yP23pcCaan+ceGfeBUsAQjw7sj9Q3R4Kl3g/TCStPzQ=="],
+
+    "@fumadocs/ui": ["@fumadocs/ui@16.5.0", "", { "dependencies": { "next-themes": "^0.4.6", "postcss-selector-parser": "^7.1.1", "tailwind-merge": "^3.4.0" }, "peerDependencies": { "@types/react": "*", "fumadocs-core": "16.5.0", "next": "16.x.x", "react": "^19.2.0", "react-dom": "^19.2.0", "tailwindcss": "^4.0.0" }, "optionalPeers": ["@types/react", "next", "tailwindcss"] }, "sha512-64P3QqnN5SjjqsKLIoA/6Tgzrs05JthZSa4RxuTCmXMXkjKOV6m6x6hanQrDzX1M27xVIlwuDrxLBzA21t0CgQ=="],
 
     "@hono/node-server": ["@hono/node-server@1.19.7", "", { "peerDependencies": { "hono": "^4" } }, "sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw=="],
 
@@ -2118,6 +2121,8 @@
     "@eslint-community/eslint-utils/eslint-visitor-keys": ["eslint-visitor-keys@3.4.3", "", {}, "sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag=="],
 
     "@eslint/eslintrc/globals": ["globals@14.0.0", "", {}, "sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ=="],
+
+    "@fumadocs/ui/tailwind-merge": ["tailwind-merge@3.6.0", "", {}, "sha512-uxL7qAVQriqRQPAyK3pj66VqskWqoZ37PW94jwOTwNfq/z9oyu1V+eqrZqtR2+fCiXdYOZe/Modt8GtvqNzu+w=="],
 
     "@mdx-js/mdx/unist-util-visit": ["unist-util-visit@5.0.0", "", { "dependencies": { "@types/unist": "^3.0.0", "unist-util-is": "^6.0.0", "unist-util-visit-parents": "^6.0.0" } }, "sha512-MR04uvD+07cwl/yhVuVWAtw+3GOR/knlL55Nd/wAdblk27GCVt3lqpTivy/tkJcZoNPzTwS1Y+KMojlLDhoTzg=="],
 
