@@ -3,7 +3,6 @@ import { createMDX } from "fumadocs-mdx/next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  serverExternalPackages: ['typescript', 'twoslash'],
 };
 
 const withMDX = createMDX({
